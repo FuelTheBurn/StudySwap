@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <style>
+    img {
+      width: 100%;
+    }
+  </style>
+  <title>File Search</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 m-auto">
+        <h1 class="text-center display-4 my-4">File Search</h1>
+        <div class="col-md-6 d-flex align-items-center justify-content-center">
+          <form id="tagForm">
+            <% tags.forEach(function(tag) { %>
+              <input type="checkbox" name="tags" value="<%= tag.name %>"> <%= tag.name %><br>
+            <% }); %>
+            <button type="button" id="searchButton">Search</button>
+          </form>
+        </div>
+        <hr>
+
+        <div id="fileResults">
+          <% if (typeof files !== 'undefined' && files) { %>
+            <% files.forEach(function(file) { %>
+              <div class="row file-entry" data-tags="<%= file.metadata.tags ? file.metadata.tags.join(',') : '' %>">
+                <div class="col-md-6">
+                  <div class="card card-body mb-3">
+                    <% if (file.isImage) { %>
+                      <img src="image/<%= file.filename %>" alt="">
+                      <p><%= file.metadata.originalname %></p>
+                    <% } else { %>
+                      <p><%= file.metadata.originalname %></p>
+                    <% } %>
+                    <form method="POST" action="/files/<%= file._id %>?_method=DELETE">
+                      <button class="btn btn-danger btn-block mt-4">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p>No files to show</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Declare selectedTags as a global variable
+    let selectedTags = [];
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+      selectedTags = []; // Clear the array each time the button is clicked
+      const checkboxes = document.querySelectorAll('input[name="tags"]:checked');
+      
+      checkboxes.forEach((checkbox) => {
+        selectedTags.push(checkbox.value);
+      });
+
+      console.log(selectedTags); // Log the global array of selected tags
+
+      // Filter the displayed files based on selected tags
+      const fileEntries = document.querySelectorAll('.file-entry');
+
+      fileEntries.forEach((entry) => {
+        const fileTags = entry.getAttribute('data-tags').split(',');
+        
+        // Check if there is an intersection between fileTags and selectedTags
+        const matchingTags = selectedTags.filter(tag => fileTags.includes(tag));
+        console.log("here");
+        console.log(matchingTags);
+        if (selectedTags.length === 0 || matchingTags.length < selectedTags.length) {
+          entry.style.display = 'none'; // Show the file entry if it matches
+        } else {
+          entry.style.display = 'block'; // Hide if it doesn't match
+        }
+      });
+    });
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
